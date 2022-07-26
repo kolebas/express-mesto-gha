@@ -1,15 +1,30 @@
 const express = require('express');
+const path = require('path');
 const mongoose = require('mongoose');
-const { PORT = 3000, BASE_PATH } = process.env;
+const bodyParser = require('body-parser');
+
+const { PORT = 3000 } = process.env;
 
 const app = express();
 
-mongoose.connect('mongodb://localhost:27017/mynewdb', {
-  useNewUrlParser: true,
-  useCreateIndex: true,
-  useFindAndModify: false
+app.use((req, res, next) => {
+  req.user = {
+    _id: '62df89f06a17caff60152539',
+  };
+  next();
 });
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+mongoose.connect('mongodb://localhost:27017/mestodb', {
+  useNewUrlParser: true,
+});
+
+app.use('/cards', require('./routes/cards'));
+app.use('/users', require('./routes/users'));
+
+app.use(express.static(path.join(__dirname, 'public')));
+
 app.listen(PORT, () => {
-  console.log(`Ссылка на сервер localhost:${PORT}`);
 });
