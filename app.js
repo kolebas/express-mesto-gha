@@ -26,5 +26,9 @@ app.use('/users', require('./routes/users'));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.listen(PORT, () => {
-});
+async function main() {
+  await mongoose.connect('mongodb://localhost:27017/mestodb');
+  await app.listen(PORT);
+}
+
+main();
