@@ -2,7 +2,7 @@ const Card = require('../models/card');
 
 function sendError(data) {
   const { res, err, message } = data;
-  if (err.name === 'ValidationError') {
+  if (err.name === 'ValidationError' || err.name === 'CastError') {
     const ERROR_CODE = 400;
     res.status(ERROR_CODE).send({ message });
   } else {
@@ -20,11 +20,11 @@ module.exports.getCards = (req, res) => {
 
 module.exports.createCard = (req, res) => {
   const {
-    name, link, ownerId, likes, createAt,
+    name, link,
   } = req.body;
 
   Card.create({
-    name, link, owner: ownerId, likes, createAt,
+    name, link, owner: req.user._id,
   })
     .then((card) => res.send({ data: card }))
     .catch((err) => {
@@ -33,30 +33,33 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
+  const ERROR_CODE = 404;
   Card.deleteOne({ _id: req.params.cardId })
-    .then((card) => (card ? res.send({ data: card }) : res.status(404).send({ message: 'Карточка с указанным _id не найдена.' })))
+    .then((card) => (card ? res.send({ data: card }) : res.status(ERROR_CODE).send({ message: 'Карточка с указанным _id не найдена.' })))
     .catch((err) => sendError({ res, err }));
 };
 
 module.exports.likeCard = (req, res) => {
+  const ERROR_CODE = 404;
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => (card ? res.send({ data: card }) : res.status(404).send({ message: 'Передан несуществующий _id карточки' })))
+    .then((card) => (card ? res.send({ data: card }) : res.status(ERROR_CODE).send({ message: 'Передан несуществующий _id карточки' })))
     .catch((err) => {
       sendError({ res, err, message: 'Переданы некорректные данные для постановки/снятии лайка' });
     });
 };
 
 module.exports.dislikeCard = (req, res) => {
+  const ERROR_CODE = 404;
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => (card ? res.send({ data: card }) : res.status(400).send({ message: 'Запрашиваемая карточка не найдена' })))
+    .then((card) => (card ? res.send({ data: card }) : res.status(ERROR_CODE).send({ message: 'Запрашиваемая карточка не найдена' })))
     .catch((err) => {
       sendError({ res, err, message: 'Переданы некорректные данные для постановки/снятии лайка' });
     });
