@@ -20,6 +20,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/cards', require('./routes/cards'));
 app.use('/users', require('./routes/users'));
 
+app.use((req, res, next) => {
+  const ERROR_CODE = 404;
+  res.status(ERROR_CODE).send({ message: 'Маршрут не найден' });
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 async function main() {

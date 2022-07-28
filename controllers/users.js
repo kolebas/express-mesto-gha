@@ -1,7 +1,7 @@
 const User = require('../models/user');
 
 function sendError(data) {
-  const { res, err, message } = data;
+  const { res, err, message = 'Что-то пошло не так' } = data;
   if (err.name === 'ValidationError' || err.name === 'CastError') {
     const ERROR_CODE = 400;
     res.status(ERROR_CODE).send({ message });
