@@ -34,8 +34,8 @@ module.exports.createCard = (req, res) => {
 
 module.exports.deleteCard = (req, res) => {
   const ERROR_CODE = 404;
-  Card.deleteOne({ _id: req.params.cardId })
-    .then((card) => (card ? res.send({ data: card }) : res.status(ERROR_CODE).send({ message: 'Карточка с указанным _id не найдена.' })))
+  Card.findOneAndDelete({ _id: req.params.cardId, owner: req.user._id })
+    .then((card) => (card ? res.send({ data: card }) : res.status(ERROR_CODE).send({ message: 'Карточка с указанным _id не найдена, или у вас недостаточно прав' })))
     .catch((err) => sendError({ res, err }));
 };
 
