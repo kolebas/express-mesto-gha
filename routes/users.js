@@ -13,12 +13,13 @@ router.get('/:userId', celebrate({
 }), getUserById);
 router.patch('/me', celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().required(),
+    name: Joi.string().required(),
+    about: Joi.string().required(),
   }),
 }), updateUserProfileById);
 router.patch('/me/avatar', celebrate({
   params: Joi.object().keys({
-    _id: Joi.string().required(),
+    avatar: Joi.string().required(),
   }),
 }), updateUserAvatarById);
 

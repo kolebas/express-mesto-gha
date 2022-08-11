@@ -34,8 +34,13 @@ app.post('/signup', celebrate({
 
 app.use(errors());
 app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
-  res.status(statusCode).send({ message: statusCode === 500 ? 'На сервере произошла ошибка' : message });
+  const { statusCode = 500, message, code } = err;
+  if (code === 11000) {
+    const ERROR_CODE = 409;
+    res.status(ERROR_CODE).send({ message: 'Пользователь с такой почтой уже существует' });
+  } else {
+    res.status(statusCode).send({ message: statusCode === 500 ? 'На сервере произошла ошибка' : message });
+  }
   next();
 });
 
