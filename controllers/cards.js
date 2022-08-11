@@ -21,7 +21,7 @@ module.exports.createCard = (req, res, next) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Переданы некорректные данные при создании карточки');
+        next(new BadRequestError('Переданы некорректные данные при создании карточки'));
       } else {
         next(err);
       }
@@ -42,16 +42,15 @@ module.exports.deleteCard = (req, res, next) => {
 };
 
 module.exports.likeCard = (req, res, next) => {
-  const ERROR_CODE = 404;
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => (card ? res.send({ data: card }) : res.status(ERROR_CODE).send({ message: 'Передан несуществующий _id карточки' })))
+    .then((card) => (card ? res.send({ data: card }) : new NotFoundError('Карточка с указанным _id не найдена')))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new BadRequestError('Переданы некорректные данные для постановки/снятии лайка');
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Переданы некорректные данные для постановки/снятии лайка'));
       } else {
         next(err);
       }
@@ -59,16 +58,15 @@ module.exports.likeCard = (req, res, next) => {
 };
 
 module.exports.dislikeCard = (req, res, next) => {
-  const ERROR_CODE = 404;
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => (card ? res.send({ data: card }) : res.status(ERROR_CODE).send({ message: 'Запрашиваемая карточка не найдена' })))
+    .then((card) => (card ? res.send({ data: card }) : new NotFoundError('Карточка с указанным _id не найдена')))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new BadRequestError('Переданы некорректные данные для постановки/снятии лайка');
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Переданы некорректные данные для постановки/снятии лайка'));
       } else {
         next(err);
       }

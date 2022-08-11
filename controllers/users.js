@@ -50,9 +50,9 @@ module.exports.createUser = (req, res, next) => {
     }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Переданы некорректные данные');
+        next(new BadRequestError('Переданы некорректные данные'));
       } else if (err.code === 11000) {
-        throw new ConflictError('Пользователь с таким email уже существует');
+        next(new ConflictError('Пользователь с таким email уже существует'));
       } else {
         next(err);
       }
@@ -75,7 +75,7 @@ module.exports.updateUserProfileById = (req, res, next) => {
     .then((user) => { if (!user) { throw new NotFoundError('Нет пользователя с таким id'); } res.send({ data: user }); })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Переданы некорректные данные при обновлении профиля');
+        next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
       } else {
         next(err);
       }
@@ -92,7 +92,7 @@ module.exports.updateUserAvatarById = (req, res, next) => {
     .then((user) => { if (!user) { throw new NotFoundError('Нет пользователя с таким id'); } res.send({ data: user }); })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Переданы некорректные данные при обновлении аватара');
+        next(new BadRequestError('Переданы некорректные данные при обновлении аватара'));
       } else {
         next(err);
       }
