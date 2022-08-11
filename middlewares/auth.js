@@ -6,13 +6,13 @@ const handleAuthError = () => {
   return error;
 };
 
-const extractAuthToken = (header) => header.replace('Auth ', '');
+const extractAuthToken = (header) => header.replace('Bearer ', '');
 
 // eslint-disable-next-line consistent-return
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
 
-  if (!authorization || !authorization.startsWith('Auth ')) {
+  if (!authorization || !authorization.startsWith('Bearer ')) {
     next(handleAuthError());
   }
 

@@ -30,14 +30,25 @@ module.exports.createCard = (req, res, next) => {
   })
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      sendError({ name: err.name, message: 'Переданы некорректные данные при создании карточки', next });
+      if (err.name === 'ValidationError') {
+        sendError({ name: err.name, message: 'Переданы некорректные данные при создании карточки', next });
+      } else {
+        next(err);
+      }
     });
 };
 
 module.exports.deleteCard = (req, res, next) => {
   const ERROR_CODE = 404;
-  Card.findOneAndDelete({ _id: req.params.cardId, owner: req.user._id })
-    .then((card) => (card ? res.send({ data: card }) : res.status(ERROR_CODE).send({ message: 'Карточка с указанным _id не найдена, или у вас недостаточно прав' })))
+  Card.findById({ _id: req.params.cardId })
+    .orFail(() => sendError({ code: ERROR_CODE, message: 'Карточка с указанным _id не найдена', next }))
+    .then((card) => {
+      if (!card.owner.equals(req.user._id)) {
+        sendError({ message: 'нельзя удалить чужую карточку', next });
+      }
+      return card.remove()
+        .then(() => res.send({ data: card }));
+    })
     .catch(next);
 };
 
@@ -50,7 +61,11 @@ module.exports.likeCard = (req, res, next) => {
   )
     .then((card) => (card ? res.send({ data: card }) : res.status(ERROR_CODE).send({ message: 'Передан несуществующий _id карточки' })))
     .catch((err) => {
-      sendError({ name: err.name, message: 'Переданы некорректные данные для постановки/снятии лайка', next });
+      if (err.name === 'ValidationError') {
+        sendError({ name: err.name, message: 'Переданы некорректные данные для постановки/снятии лайка', next });
+      } else {
+        next(err);
+      }
     });
 };
 
@@ -63,6 +78,10 @@ module.exports.dislikeCard = (req, res, next) => {
   )
     .then((card) => (card ? res.send({ data: card }) : res.status(ERROR_CODE).send({ message: 'Запрашиваемая карточка не найдена' })))
     .catch((err) => {
-      sendError({ name: err.name, message: 'Переданы некорректные данные для постановки/снятии лайка', next });
+      if (err.name === 'ValidationError') {
+        sendError({ name: err.name, message: 'Переданы некорректные данные для постановки/снятии лайка', next });
+      } else {
+        next(err);
+      }
     });
 };

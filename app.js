@@ -1,5 +1,4 @@
 const express = require('express');
-const path = require('path');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { celebrate, Joi } = require('celebrate');
@@ -21,30 +20,29 @@ app.use('/users', auth, require('./routes/users'));
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
-    email: Joi.string().required(),
+    email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
 }), login);
 app.post('/signup', celebrate({
   body: Joi.object().keys({
-    email: Joi.string().required(),
+    email: Joi.string().required().email(),
     password: Joi.string().required(),
+    name: Joi.string(),
+    about: Joi.string(),
+    avatar: Joi.string(),
   }),
 }), createUser);
 
+app.use((req, res, next) => {
+  next(new Error('Маршрут не найден'));
+});
 app.use(errors());
 app.use((err, req, res, next) => {
-  const { statusCode = 500, message, code } = err;
-  if (code === 11000) {
-    const ERROR_CODE = 409;
-    res.status(ERROR_CODE).send({ message: 'Пользователь с такой почтой уже существует' });
-  } else {
-    res.status(statusCode).send({ message: statusCode === 500 ? 'На сервере произошла ошибка' : message });
-  }
+  const { statusCode = 500, message } = err;
+  res.status(statusCode).send({ message: statusCode === 500 ? 'На сервере произошла ошибка' : message });
   next();
 });
-
-app.use(express.static(path.join(__dirname, 'public')));
 
 async function main() {
   await mongoose.connect('mongodb://localhost:27017/mestodb');
