@@ -6,24 +6,25 @@ const {
 
 router.get('/', getCards);
 router.post('/', celebrate({
-  params: Joi.object().keys({
+  body: Joi.object().keys({
     name: Joi.string().required(),
     link: Joi.string().required(),
+    ownerId: Joi.string().required(),
   }),
 }), createCard);
 router.delete('/:cardId', celebrate({
   params: Joi.object().keys({
-    _id: Joi.string().required(),
+    cardId: Joi.string().required(),
   }),
 }), deleteCard);
 router.put('/:cardId/likes', celebrate({
   params: Joi.object().keys({
-    _id: Joi.string().required(),
+    cardId: Joi.string().required(),
   }),
 }), likeCard);
 router.delete('/:cardId/likes', celebrate({
   params: Joi.object().keys({
-    _id: Joi.string().required(),
+    cardId: Joi.string().required(),
   }),
 }), dislikeCard);
 
